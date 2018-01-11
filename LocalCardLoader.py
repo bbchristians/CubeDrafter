@@ -25,14 +25,12 @@ class LocalCardLoader(CardLoader):
       
       for line in reader:
       
-        print(line)
-      
         name = line[0]
         count = int(line[1])
         rarity = line[2]
         image_url = line[3]
         
-        card_response_dict = {'name': name, 'rarity': rarity, 'image_url': image_url}
+        card_response_dict = {'name': name, 'rarity': rarity, 'imageUrl': image_url}
         cards += [mtg.Card(card_response_dict)] * count
   
     return cards
