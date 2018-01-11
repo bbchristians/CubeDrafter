@@ -4,6 +4,7 @@ import csv;
 from CardLoader import CardLoader;
 import CardLoader as cl_mod;
 
+CARD_NO_MULT = 5
 
 class LocalCardLoader(CardLoader):
 
@@ -31,7 +32,7 @@ class LocalCardLoader(CardLoader):
         image_url = line[3]
         
         card_response_dict = {'name': name, 'rarity': rarity, 'imageUrl': image_url}
-        cards += [mtg.Card(card_response_dict)] * count
+        cards += [mtg.Card(card_response_dict)] * count * CARD_NO_MULT
   
     return cards
         
