@@ -159,7 +159,7 @@ def make_draft(pool):
 
   draft = Draft()
 
-  player = HumanDrafter("me", packs[0:3], draft)
+  player = HumanDrafter("me", packs[0:3], draft, gui=True)
   del packs[0:3]
   
   draft.add_human_drafter(player)

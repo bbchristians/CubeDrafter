@@ -26,13 +26,15 @@ class Draft:
   def start_draft(self):
   
     self.crack_packs()
-    self.ready_picks()
     
     
   def ready_picks(self):
   
     self.ai_draft_packs()
-    #self.human_drafter.make_pick()
+    
+    if self.gui is None:
+    
+      self.human_drafter.make_pick()
       
       
   def crack_packs(self):

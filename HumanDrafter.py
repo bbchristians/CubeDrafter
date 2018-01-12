@@ -5,11 +5,13 @@ class HumanDrafter(Drafter):
 
   draft = None
   pool = []
+  gui = False
 
-  def __init__(self, name, packs, draft):
+  def __init__(self, name, packs, draft, gui=False):
   
     super().__init__(name, packs)
     self.draft = draft
+    self.gui = gui
     
   def make_pick(self):
   
@@ -22,9 +24,10 @@ class HumanDrafter(Drafter):
       print("{}: {}({})".format(no, card.name, card.rarity[0]))
       no += 1
       
-    #selection = input("Draft Pick: ")
-    
-    #self.confirm_pick(int(selection))
+    if not self.gui:
+      
+      selection = input("Draft Pick: ")
+      self.confirm_pick(int(selection))
     
   def confirm_pick(self, index):
   
