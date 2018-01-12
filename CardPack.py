@@ -1,6 +1,8 @@
 import mtgsdk as mtg;
 import random;
 
+RARITY_ORDER = {"Rare":1, "Mythic Rare":1, "Uncommon":2, "Common":3}
+
 class CardPack():
 
   cards = []
@@ -89,7 +91,12 @@ class CardPack():
       
         pack += [commons.pop(0)]
         
-        
       ret_packs += [CardPack(pack)]
         
     return ret_packs
+    
+    
+  # Static Function  
+  def sort_cards(cards):
+  
+    return sorted(cards, key=lambda c: 100000*RARITY_ORDER[c.rarity] + 100*ord(c.name[0]) + ord(c.name[1]))

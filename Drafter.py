@@ -26,7 +26,7 @@ class Drafter:
     
     opened_pack = self.packs.pop()
     self.current_pack = opened_pack.cards
-    print(self.current_pack)
+    #print(self.current_pack)
     
     
   def pass_pack(self):
@@ -37,7 +37,7 @@ class Drafter:
     
   def get_pack(self, pack):
   
-    self.current_pack = pack
+    self.current_pack = CardPack.sort_cards(pack)
     
     
   def make_pick(self):

@@ -1,6 +1,7 @@
 from Drafter import Drafter;
 import random;
 
+
 class AIDrafter(Drafter):
 
   def __init__(self, name, packs):
@@ -12,3 +13,4 @@ class AIDrafter(Drafter):
     # TODO Make Machines Learn
     random.shuffle(self.current_pack)
     self.picks += [self.current_pack.pop()]
+    

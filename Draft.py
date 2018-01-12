@@ -7,6 +7,7 @@ class Draft:
 
   drafters = []
   human_drafter = None
+  gui = None
 
   def __init__(self):
   
@@ -31,7 +32,7 @@ class Draft:
   def ready_picks(self):
   
     self.ai_draft_packs()
-    self.human_drafter.make_pick()
+    #self.human_drafter.make_pick()
       
       
   def crack_packs(self):
@@ -46,6 +47,9 @@ class Draft:
       
       drafter.open_pack()
       
+    self.alert_gui()
+    self.ready_picks()
+      
         
   def human_makes_pick(self):
   
@@ -56,8 +60,7 @@ class Draft:
     else:
     
       self.pass_all_packs()
-      
-    self.ready_picks()
+      self.ready_picks()
       
       
       
@@ -97,8 +100,28 @@ class Draft:
       except IndexError:
       
         print("Pack/Drafter number mismatch. No Drafters: {}, No Packs:{}".format(len(self.drafters), len(new_pack_order)))
-      
+     
+    self.alert_gui()
         
+  def get_players_pack(self):
+  
+    return self.human_drafter.current_pack
+    
+    
+  def make_player_pick(self, index):
+  
+    self.human_drafter.confirm_pick(index)
+    
+  def add_gui(self, gui):
+  
+    self.gui = gui
+    
+    
+  def alert_gui(self):
+  
+    if self.gui is not None:
+  
+      self.gui.render_humans_pack()
        
        
        

@@ -4,6 +4,7 @@ from Drafter import Drafter;
 class HumanDrafter(Drafter):
 
   draft = None
+  pool = []
 
   def __init__(self, name, packs, draft):
   
@@ -21,11 +22,16 @@ class HumanDrafter(Drafter):
       print("{}: {}({})".format(no, card.name, card.rarity[0]))
       no += 1
       
-    selection = input("Draft Pick: ")
-    pick = self.current_pack[int(selection)]
+    #selection = input("Draft Pick: ")
     
-    del self.current_pack[int(selection)]
+    #self.confirm_pick(int(selection))
+    
+  def confirm_pick(self, index):
+  
+    self.pool += [self.current_pack[index]]
+    
+    print("Human Picked Card: {}".format(self.current_pack[index].name))
+    
+    del self.current_pack[int(index)]
     
     self.draft.human_makes_pick()
-    
-    
