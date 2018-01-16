@@ -1,0 +1,53 @@
+TODO:
+
+
+General
+---------------
+Make these in some kind of organization software instead of a text file
+Pretend I'm actually working on a degree that heavily emphasizes OO design
+Learn how to make an executable for python that doesn't make me look like an idiot
+
+
+
+Data
+---------------
+Add a unique ID (From magic API), color, CMC, (types? if not in desc) and desc to locally saved card data
+  Unique ID for AI recognition of cards
+    Upload via unique ID?
+  Color, CMC, types for AI decision making
+  Desc for GUI Display and AI decision parsing
+Add a means of loading all images for a pool (Don't do on initial web query, but have function to do it later)
+Actual non-csv DBs?
+
+
+Machine Learning
+---------------
+Create object for saving a Humans' draft picks
+  Attend enough Linear Algebra classes that I can somewhat understand articles detailing how to efficiently transform this information into relevant data
+  But first do it poorly
+Create a means of parsing card description data for keywords to find associations and base other picks on
+Create a way to rewatch an AI's picks (Mostly to study algorithms' effectiveness)
+  Plain Text / GUI?
+Create a way for AI to report why it's making the decisions it is
+Investigate remote web scouring for limited set ratings (Does Draftsim have info?)
+
+
+GUI
+---------------
+Scenes
+  Draft Scene
+    Card pool display
+      Sorting (color, CMC, drag/drop? (probably not))
+  Cube Scene
+    Make a way to change
+  Menu Scene?
+  Deck Build Scene?
+  AI draft review?
+  
+  
+Stretch
+--------------
+Make available on web to gather draft data from other users to assist with machine learning
+
+
+
