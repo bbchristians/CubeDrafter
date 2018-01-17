@@ -1,2 +1,6 @@
+# Ignore Image contents upload
 Images/*.png
-*/__pycache__/*
+!Images/.gitkeep
+
+# Ignore compiled python scripts
+__pycache__/
