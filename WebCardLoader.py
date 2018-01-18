@@ -66,3 +66,12 @@ class WebCardLoader(CardLoader):
           break
       
     return card_pool
+    
+    
+if __name__ == "__main__":
+
+  loader = WebCardLoader("SampleCube.csv")
+  cards = loader.get_cards()
+  loader.save_cards("cube1", cards)
+  
+  

@@ -45,8 +45,10 @@ class CardLoader:
       
       for card in card_set:
       
-        csv_line = [card.name, cards.count(card), card.rarity, card.image_url]
+        csv_line = [card.name, cards.count(card), card.rarity, card.image_url, card.cmc]
         
         writer.writerow(csv_line)
+        
+
     
     

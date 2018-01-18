@@ -4,8 +4,7 @@ from Drafter import Drafter;
 class HumanDrafter(Drafter):
 
   draft = None
-  pool = []
-  gui = False
+  gui = False # Flag to determine if the program is run from the command line or from a gui
 
   def __init__(self, name, packs, draft, gui=False):
   
@@ -31,7 +30,7 @@ class HumanDrafter(Drafter):
     
   def confirm_pick(self, index):
   
-    self.pool += [self.current_pack[index]]
+    self.picks += [self.current_pack[index]]
     
     print("Human Picked Card: {}".format(self.current_pack[index].name))
     

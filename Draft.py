@@ -42,6 +42,7 @@ class Draft:
     if len(self.human_drafter.packs) <= 0 :
     
       print("Draft Concluded")
+      self.alert_gui()
       return
   
     print("Drafters opened packs!")
@@ -109,6 +110,10 @@ class Draft:
   
     return self.human_drafter.current_pack
     
+  def get_players_picks(self):
+  
+    return self.human_drafter.picks
+    
     
   def make_player_pick(self, index):
   
@@ -124,6 +129,7 @@ class Draft:
     if self.gui is not None:
   
       self.gui.render_humans_pack()
+      self.gui.render_humans_picks()
        
        
        

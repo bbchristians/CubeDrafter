@@ -12,6 +12,7 @@ class Drafter:
   
     self.name = name
     self.packs = packs
+    self.picks = []
     
     
   def open_pack(self):

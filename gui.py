@@ -17,17 +17,21 @@ IMAGE_EXT = ".png"
 NO_DRAFT_COL = 6
 CARD_WIDTH = 223
 CARD_HEIGHT = 311
-CARD_PAD_X = 5
-CARD_PAD_Y = 5
+CARD_PAD_X = 3
+CARD_PAD_Y = 3
 MAX_POSSIBLE_ROWS = 3
-RANDOM_LEFT_PADDING = 25
-LEFT_PADDING = 228
-DRAFT_WINDOW_HEIGHT = 637
+LEFT_PADDING = 228 # There is some random negative padding that happens to be one card width + 1 padding shifting the pack to the left
+CARD_SCALE = .75
+CARD_CROPPED_HEIGHT = 32
+DRAFT_PICKS_PADDING = 15
+WINDOW_HEIGHT = 1000
 
-class Application(tk.Frame):
+class DraftWindow(tk.Frame):
 
   draft = None
   pick_buttons = []
+  pick_labels = []
+  end_of_pack_location = 0
 
   def __init__(self, master=None, draft=None):
     super().__init__(master)
@@ -43,37 +47,42 @@ class Application(tk.Frame):
     scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL)
     scrollbar.pack(fill=tk.Y, side=tk.RIGHT, expand=tk.FALSE)
     
+    # Calculate height of draft window
+    draft_window_height = (CARD_HEIGHT * CARD_SCALE * 2) + (4 * CARD_PAD_Y)
+    
     # Define and pack card canvas
-    self.canvas = tk.Canvas(self, bd=1, highlightthickness=0, yscrollcommand=scrollbar.set, height=DRAFT_WINDOW_HEIGHT)
+    #self.canvas = tk.Canvas(self, bd=1, highlightthickness=0, height=draft_window_height, yscrollcommand=scrollbar.set
+    self.canvas = tk.Canvas(self, bd=1, highlightthickness=0, height=WINDOW_HEIGHT, yscrollcommand=scrollbar.set)
     self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.TRUE)
     scrollbar.config(command=self.canvas.yview)
     
     # Calculate the canvas window width and height
-    draft_width = (CARD_WIDTH+(2*CARD_PAD_X))*NO_DRAFT_COL
-    draft_height = (CARD_HEIGHT+(2*CARD_PAD_Y))*MAX_POSSIBLE_ROWS
+    draft_width = (get_image_scaled_width()+(2*CARD_PAD_X))*NO_DRAFT_COL
+    #draft_height = (get_image_scaled_height()+(2*CARD_PAD_Y))*MAX_POSSIBLE_ROWS + 150
+    draft_height = WINDOW_HEIGHT
     
     # Define the interior frame that will be scrolled
-    self.interior = interior = tk.Frame(self.canvas, width=draft_width, height=draft_height)
+    self.interior = tk.Frame(self.canvas, width=draft_width, height=draft_height)
     self.interior.pack_propagate(0)
-    interior_id = self.canvas.create_window(0, 0, window=interior, anchor=tk.NW)
+    interior_id = self.canvas.create_window(0, 0, window=self.interior, anchor=tk.NW)
     
     # track changes to the canvas and frame width and sync them,
     # also updating the scrollbar
     def _configure_interior(event):
     
       # update the scrollbars to match the size of the inner frame
-      size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
+      size = (self.interior.winfo_reqwidth(), self.interior.winfo_reqheight())
       
       self.canvas.config(scrollregion="0 0 %s %s" % size)
       
-      if interior.winfo_reqwidth() != self.canvas.winfo_width()
+      if self.interior.winfo_reqwidth() != self.canvas.winfo_width():
         # update the canvas's width to fit the inner frame
-        self.canvas.config(width=interior.winfo_reqwidth())
+        self.canvas.config(width=self.interior.winfo_reqwidth())
 
-    interior.bind('<Configure>', _configure_interior)
+    self.interior.bind('<Configure>', _configure_interior)
 
     def _configure_canvas(event):
-      if interior.winfo_reqwidth() != self.canvas.winfo_width():
+      if self.interior.winfo_reqwidth() != self.canvas.winfo_width():
         # update the inner frame's width to fill the canvas
         self.canvas.itemconfigure(interior_id, width=self.canvas.winfo_width())
         
@@ -93,6 +102,11 @@ class Application(tk.Frame):
     
   def render_pack(self, cards):
   
+    # If the last card of the last pack was just drafted, move the pool display up
+    if len(cards) is 0:
+    
+      self.end_of_pack_location = 0
+  
     # Remove all the old cards
     for button in self.pick_buttons:
     
@@ -110,7 +124,7 @@ class Application(tk.Frame):
     
       # Try to create a button that correlates to picking the imposed card
       try:
-        b=tk.Button(self.interior,relief=tk.FLAT, command=lambda i=card_num: self.draft.make_player_pick(i))
+        b=tk.Button(self.interior, relief=tk.FLAT, command=lambda i=card_num: self.draft.make_player_pick(i))
         
         # Store a reference to the button later to easily delete it
         self.pick_buttons += [b]
@@ -129,17 +143,23 @@ class Application(tk.Frame):
           urllib.request.urlretrieve(card.image_url, image_path)
           image = Image.open(image_path)
 
+        image_scaled_height = get_image_scaled_height()
+        image_scaled_width = get_image_scaled_width()
+        image = image.resize((image_scaled_width, image_scaled_height), Image.ANTIALIAS)
+          
         #image = image.crop((0,0,CARD_WIDTH,32))
         photo = ImageTk.PhotoImage(image)
         
         # Add the image to the button
-        b.config(image=photo,width=CARD_WIDTH,height=CARD_HEIGHT)
+        b.config(image=photo,width=image_scaled_width,height=image_scaled_height)
         b.image = photo
         
         # Place the card on the canvas according to its position in the sorted pack
-        card_x = LEFT_PADDING + CARD_PAD_X + c*((2*CARD_PAD_X)+CARD_WIDTH)
-        card_y = CARD_PAD_Y + r*((2*CARD_PAD_Y)+CARD_HEIGHT)
+        card_x = (LEFT_PADDING*CARD_SCALE) + CARD_PAD_X + c*((2*CARD_PAD_X)+image_scaled_width)
+        card_y = CARD_PAD_Y + r*((2*CARD_PAD_Y)+image_scaled_height)
         b.place(x=card_x, y=card_y, anchor=tk.NE)
+        
+        self.end_of_pack_location = max(self.end_of_pack_location, card_y + (CARD_HEIGHT * CARD_SCALE) + CARD_PAD_Y)
         
         # Increment counting vars
         c += 1
@@ -155,14 +175,101 @@ class Application(tk.Frame):
       
         print("oops: " + str(err))
         
+        
+  def render_picks(self, cards):
+  
+    # Remove all old picks
+    for label in self.pick_labels:
+    
+      label.destroy()
+      
+    self.pick_labels = []
+  
+    # Draw a line to separate draft picks and the pack TODO MAKE WORK
+    self.canvas.create_line(self.end_of_pack_location + 5, 0, 0, 0)
+    self.canvas.pack()
+  
+    # Define card CMC y positions
+    cmc_heights = [DRAFT_PICKS_PADDING] * 100
+  
+    for card in cards:
+    
+      # Try to create a label that correlates to picking the imposed card
+      try:
+      
+        # Get the Multiverse ID which is the filename of the image
+        mvid = extract_multiverseid(card.image_url)
+        image_path = IMAGE_DIR + mvid + IMAGE_EXT
+        
+        # Try to load the image locally, if not found, then retrieve it from the web
+        try:
+        
+          image = Image.open(image_path)
+          
+        except FileNotFoundError:
+        
+          urllib.request.urlretrieve(card.image_url, image_path)
+          image = Image.open(image_path)
+          
+        image_scaled_width = get_image_scaled_width()
+        image_scaled_height = get_image_scaled_height()
+        image_crop_height = CARD_CROPPED_HEIGHT*CARD_SCALE
+          
+        image = image.resize((image_scaled_width, image_scaled_height), Image.ANTIALIAS)
+        #image = image.crop((0,0,CARD_WIDTH*CARD_SCALE,image_crop_height))
+        photo = ImageTk.PhotoImage(image)
+        
+        # Create the label and add the image to the label
+        label = tk.Label(self.interior, image=photo, bg="black", borderwidth=0, highlightthickness=0)
+        label.image = photo
+        self.pick_labels += [label]
+        
+        # Get the CMC of the card (For placement)
+        card_cmc = 0
+        try:
+        
+          card_cmc = int(card.cmc)
+          
+        except ValueError:
+        
+          print("Invalid CMC for card \"{}\": {}".format(card.name, card.cmc))
+        
+        
+        # Determine the height at which the card should be placed
+        height = cmc_heights[card_cmc]
+        cmc_heights[card_cmc] = height + image_crop_height
+        
+        # Place the card on the canvas according to its position in the sorted pack
+        card_x = (LEFT_PADDING*CARD_SCALE) + CARD_PAD_X + card_cmc*((2*CARD_PAD_X)+image_scaled_width)
+        card_y = self.end_of_pack_location + height
+        label.place(x=card_x, y=card_y, anchor=tk.NE)
+        
+      # Generic error report
+      except tk.TclError as err:
+      
+        print("oops: " + str(err))
+        
     
   def render_humans_pack(self):
   
     #Renders the Human player's pack
   
     self.render_pack(self.draft.get_players_pack())
-
     
+  def render_humans_picks(self):
+  
+    self.render_picks(self.draft.get_players_picks())
+  
+
+def get_image_scaled_height():
+
+  return int(CARD_HEIGHT * CARD_SCALE)
+  
+  
+def get_image_scaled_width():
+
+  return int(CARD_WIDTH * CARD_SCALE)
+  
 def extract_multiverseid(url):
 
   return (((url.split("multiverseid="))[1]).split("&type=card"))[0]
@@ -205,8 +312,8 @@ def main():
   root.title("CubeDrafter")
   root.resizable(0,0)
   
-  app = Application(master=root, draft=draft)
-  app.mainloop()
+  draft_window = DraftWindow(master=root, draft=draft)
+  draft_window.mainloop()
   
   
   

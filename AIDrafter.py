@@ -11,6 +11,10 @@ class AIDrafter(Drafter):
   def make_pick(self):
   
     # TODO Make Machines Learn
-    random.shuffle(self.current_pack)
-    self.picks += [self.current_pack.pop()]
+    pick_indexes = list(range(0,min(len(self.current_pack), 8))) + [0,0,0,1,1,1]
+    pick_index = random.choice(pick_indexes)
+    pick = self.current_pack[pick_index]
+    del self.current_pack[pick_index]
+    
+    self.picks += [pick]
     
