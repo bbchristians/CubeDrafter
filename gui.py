@@ -15,16 +15,18 @@ IMAGE_DIR = "Images/"
 IMAGE_EXT = ".png"
 
 NO_DRAFT_COL = 6
+MAX_POSSIBLE_ROWS = 3
 CARD_WIDTH = 223
 CARD_HEIGHT = 311
 CARD_PAD_X = 3
 CARD_PAD_Y = 3
-MAX_POSSIBLE_ROWS = 3
 LEFT_PADDING = 228 # There is some random negative padding that happens to be one card width + 1 padding shifting the pack to the left
 CARD_SCALE = .75
 CARD_CROPPED_HEIGHT = 32
 DRAFT_PICKS_PADDING = 15
 WINDOW_HEIGHT = 1000
+RIGHT_HAND_DISPLAY_WIDTH = 250
+MAX_CARD_CMC = 6
 
 class DraftWindow(tk.Frame):
 
@@ -32,6 +34,7 @@ class DraftWindow(tk.Frame):
   pick_buttons = []
   pick_labels = []
   end_of_pack_location = 0
+  card_display_label = None
 
   def __init__(self, master=None, draft=None):
     super().__init__(master)
@@ -51,14 +54,12 @@ class DraftWindow(tk.Frame):
     draft_window_height = (CARD_HEIGHT * CARD_SCALE * 2) + (4 * CARD_PAD_Y)
     
     # Define and pack card canvas
-    #self.canvas = tk.Canvas(self, bd=1, highlightthickness=0, height=draft_window_height, yscrollcommand=scrollbar.set
     self.canvas = tk.Canvas(self, bd=1, highlightthickness=0, height=WINDOW_HEIGHT, yscrollcommand=scrollbar.set)
     self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.TRUE)
     scrollbar.config(command=self.canvas.yview)
     
     # Calculate the canvas window width and height
-    draft_width = (get_image_scaled_width()+(2*CARD_PAD_X))*NO_DRAFT_COL
-    #draft_height = (get_image_scaled_height()+(2*CARD_PAD_Y))*MAX_POSSIBLE_ROWS + 150
+    draft_width = (get_image_scaled_width()+(2*CARD_PAD_X))*NO_DRAFT_COL + RIGHT_HAND_DISPLAY_WIDTH
     draft_height = WINDOW_HEIGHT
     
     # Define the interior frame that will be scrolled
@@ -112,7 +113,7 @@ class DraftWindow(tk.Frame):
     
       button.destroy()
       
-    # clear pick_buttons
+    # Clear pick_buttons
     self.pick_buttons = []
 
     # Define row, col, and count vars
@@ -143,11 +144,10 @@ class DraftWindow(tk.Frame):
           urllib.request.urlretrieve(card.image_url, image_path)
           image = Image.open(image_path)
 
+        # Calculate the scaled dimensions and resize the card images
         image_scaled_height = get_image_scaled_height()
         image_scaled_width = get_image_scaled_width()
         image = image.resize((image_scaled_width, image_scaled_height), Image.ANTIALIAS)
-          
-        #image = image.crop((0,0,CARD_WIDTH,32))
         photo = ImageTk.PhotoImage(image)
         
         # Add the image to the button
@@ -159,6 +159,10 @@ class DraftWindow(tk.Frame):
         card_y = CARD_PAD_Y + r*((2*CARD_PAD_Y)+image_scaled_height)
         b.place(x=card_x, y=card_y, anchor=tk.NE)
         
+        # Link the card button mouse overs so that mousing over highlights the card in the card display
+        self.bind_widget_mouseover(b, card)
+        
+        # Set the end of pack location if it has increased (This is to for displaying the selected cards)
         self.end_of_pack_location = max(self.end_of_pack_location, card_y + (CARD_HEIGHT * CARD_SCALE) + CARD_PAD_Y)
         
         # Increment counting vars
@@ -228,7 +232,7 @@ class DraftWindow(tk.Frame):
         card_cmc = 0
         try:
         
-          card_cmc = int(card.cmc)
+          card_cmc = min(MAX_CARD_CMC, int(card.cmc))
           
         except ValueError:
         
@@ -243,6 +247,9 @@ class DraftWindow(tk.Frame):
         card_x = (LEFT_PADDING*CARD_SCALE) + CARD_PAD_X + card_cmc*((2*CARD_PAD_X)+image_scaled_width)
         card_y = self.end_of_pack_location + height
         label.place(x=card_x, y=card_y, anchor=tk.NE)
+        
+        # Link the card label mouse overs so that mousing over highlights the card in the card display
+        self.bind_widget_mouseover(label, card)
         
       # Generic error report
       except tk.TclError as err:
@@ -259,6 +266,57 @@ class DraftWindow(tk.Frame):
   def render_humans_picks(self):
   
     self.render_picks(self.draft.get_players_picks())
+    
+  def set_card_display(self, card):
+  
+    # Try to create a label that correlates to picking the imposed card
+    try:
+    
+      # Get the Multiverse ID which is the filename of the image
+      mvid = extract_multiverseid(card.image_url)
+      image_path = IMAGE_DIR + mvid + IMAGE_EXT
+      
+      # Try to load the image locally, if not found, then retrieve it from the web
+      try:
+      
+        image = Image.open(image_path)
+        
+      except FileNotFoundError:
+      
+        urllib.request.urlretrieve(card.image_url, image_path)
+        image = Image.open(image_path)
+      
+      photo = ImageTk.PhotoImage(image)
+      
+      # Create the label and add the image to the label
+      label = tk.Label(self.interior, image=photo, bg="black", borderwidth=0, highlightthickness=0)
+      label.image = photo
+      #self.pick_labels += [label]
+      
+      # Place the card label 
+      pack_card_scaled_width = get_image_scaled_width()
+      card_x = CARD_PAD_X + NO_DRAFT_COL*((2*CARD_PAD_X)+pack_card_scaled_width) + 10
+      label.place(x=card_x, y=CARD_PAD_Y, anchor=tk.NW)
+      
+      # Preserve label reference for later
+      self.card_display_label = label
+      
+    # Generic error report
+    except tk.TclError as err:
+    
+      print("oops: " + str(err))
+      
+      
+  def clear_card_display(self):
+  
+    self.card_display_label.destroy()
+      
+      
+      
+  def bind_widget_mouseover(self, widget, card):
+  
+    widget.bind("<Enter>", lambda e, card=card: self.set_card_display(card))
+    widget.bind("<Leave>", lambda e : self.clear_card_display())
   
 
 def get_image_scaled_height():
