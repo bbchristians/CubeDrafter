@@ -190,8 +190,8 @@ class DraftWindow(tk.Frame):
     self.pick_labels = []
   
     # Draw a line to separate draft picks and the pack TODO MAKE WORK
-    self.canvas.create_line(self.end_of_pack_location + 5, 0, 0, 0)
-    self.canvas.pack()
+    # self.canvas.create_line(self.end_of_pack_location + 5, 0, 0, 0)
+    # self.canvas.pack()
   
     # Define card CMC y positions
     cmc_heights = [DRAFT_PICKS_PADDING] * 100

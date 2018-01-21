@@ -3,7 +3,7 @@ TODO:
 
 General
 ---------------
-Make these in some kind of organization software instead of a text file
+Make this todo in some kind of organization software instead of a text file
 Pretend I'm actually working on a degree that heavily emphasizes OO design
 Learn how to make an executable for python that doesn't make me look like an idiot
 
@@ -36,8 +36,7 @@ GUI
 ---------------
 Scenes
   Draft Scene
-    Card pool display
-      Sorting (color, CMC, drag/drop? (probably not))
+    Card pool display sorting (color, CMC, drag/drop? (probably not))
   Cube Scene
     Make a way to change
   Menu Scene?

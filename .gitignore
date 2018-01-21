@@ -4,3 +4,6 @@ Images/*.png
 
 # Ignore compiled python scripts
 __pycache__/
+
+# Ignoring Jetbrains files
+.idea/

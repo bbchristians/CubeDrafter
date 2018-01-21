@@ -1,6 +1,3 @@
-import sys;
-import mtgsdk as mtg;
-import csv;
 from CardPack import CardPack;
 from CardLoader import CardLoader;
 from WebCardLoader import WebCardLoader;
